@@ -1,12 +1,16 @@
 from transformers import AutoModelForCausalLM, AutoTokenizer
+import torch
 
 model_name = "Qwen/Qwen3-8B"
+device = "cuda" if torch.cuda.is_available() else "cpu"
+if device != "cuda":
+    print(f"Warning: CUDA is not available. Using {device}.")
 
 # load the tokenizer and the model
 model = AutoModelForCausalLM.from_pretrained(
     model_name,
     torch_dtype="auto",
-    device_map="auto"
+    device_map=device
 )
 tokenizer = AutoTokenizer.from_pretrained(model_name)
 
@@ -20,7 +24,7 @@ text = tokenizer.apply_chat_template(
     messages,
     tokenize=False,
     add_generation_prompt=True,
-    enable_thinking=True, # Switches between thinking and non-thinking modes. Default is True.
+    enable_thinking=False, # Switches between thinking and non-thinking modes. Default is True.
 )
 model_inputs = tokenizer([text], return_tensors="pt").to(model.device)
 
