@@ -3,6 +3,7 @@ import torch
 import logging
 import sys
 from typing import Tuple, Optional
+import argparse
 
 logger = logging.getLogger(__name__)
 device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -82,10 +83,21 @@ class InfraModel:
 
         return thinking_content, content
 
+def parse_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--model_name", type=str, default="Qwen/Qwen3-8B")
+    parser.add_argument("--enable_thinking", action="store_true", default=False)
+    parser.add_argument("user_query", type=str, default="What is the capital of France?")
+    return parser.parse_args()
 
 if __name__ == "__main__":
     setup_standard_logging()
+    args = parse_args()
     model = InfraModel()
-    conversation_exchange = ConversationExchange([{"role": "user", "content": "What is the capital of France?"}])
+    conversation_exchange = ConversationExchange([{"role": "user", "content": args.user_query}])
     print("conversation_exchange:", conversation_exchange.get_messages())
-    print(model.answer_prompt(conversation_exchange, enable_thinking=True, verbose=False))
+    thinking_content, content = model.answer_prompt(conversation_exchange, enable_thinking=args.enable_thinking, verbose=False)
+    print("thinking_content:", thinking_content)
+    print("")
+    print("")
+    print("content:", content)
